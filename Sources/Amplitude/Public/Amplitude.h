@@ -32,6 +32,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_ENUM(NSUInteger, AMPServer) {
+    AMPServerAmplitude,
+    AMPServerBendingX,
+};
+
 typedef NSString *_Nonnull (^AMPAdSupportBlock)(void);
 typedef NSDictionary *_Nullable (^AMPLocationInfoBlock)(void);
 typedef void (^AMPInitCompletionBlock)(void);
@@ -240,8 +245,10 @@ typedef void (^AMPInitCompletionBlock)(void);
  **Note:** this is required before you can log any events.
 
  @param apiKey Your Amplitude key obtained from your dashboard at https://amplitude.com/settings
+ 
+ @param serverType decide if initialize it with original Amplitude endpoints or Bending X
  */
-- (void)initializeApiKey:(NSString *)apiKey;
+- (void)initializeApiKey:(NSString *)apiKey serverType:(AMPServer)serverType;
 
 /**
  Initializes the Amplitude instance with your Amplitude API key and sets a user identifier for the current user.
@@ -253,10 +260,11 @@ typedef void (^AMPInitCompletionBlock)(void);
  @param apiKey Your Amplitude key obtained from your dashboard at https://amplitude.com/settings
 
  @param userId If your app has its own login system that you want to track users with, you can set the userId.
+ 
+ @param serverType decide if initialize it with original Amplitude endpoints or Bending X
 
 */
-- (void)initializeApiKey:(NSString *)apiKey userId:(nullable NSString *)userId;
-
+- (void)initializeApiKey:(NSString *)apiKey userId:(NSString *)userId serverType:(AMPServer)serverType;
 /**
 * Manually check in and set the forground related settings including dynamic config and sesstion. Need to be called manually when onEnterForeground if  deferCheckInForeground = true.
 */

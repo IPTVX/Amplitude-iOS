@@ -423,16 +423,18 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     [self removeObservers];
 }
 
-- (void)initializeApiKey:(NSString *)apiKey {
-    [self initializeApiKey:apiKey userId:nil setUserId:NO];
+- (void)initializeApiKey:(NSString *)apiKey
+              serverType:(AMPServer)serverType {
+    [self initializeApiKey:apiKey userId:nil setUserId:NO serverType:serverType];
 }
 
 /**
  * Initialize Amplitude with a given apiKey and userId.
  */
 - (void)initializeApiKey:(NSString *)apiKey
-                  userId:(NSString *)userId {
-    [self initializeApiKey:apiKey userId:userId setUserId:YES];
+                  userId:(NSString *)userId
+              serverType:(AMPServer)serverType {
+    [self initializeApiKey:apiKey userId:userId setUserId:YES serverType:serverType];
 }
 
 /**
@@ -441,7 +443,8 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
  */
 - (void)initializeApiKey:(NSString *)apiKey
                   userId:(NSString *)userId
-               setUserId:(BOOL)setUserId {
+               setUserId:(BOOL)setUserId
+              serverType:(AMPServer)serverType {
     if (apiKey == nil) {
         AMPLITUDE_ERROR(@"ERROR: apiKey cannot be nil in initializeApiKey:");
         return;
@@ -461,6 +464,15 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 
     if (!_initialized) {
         self.apiKey = apiKey;
+        
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            // Set static vars
+            kAMPEventLogDomain = serverType == AMPServerBendingX ? kB6XEventLogDomain : kOriginalEventLogDomain;
+            kAMPEventLogEuDomain = serverType == AMPServerBendingX ? kB6XEventLogEuDomain : kOriginalEventLogEuDomain;
+            kAMPEventLogUrl = serverType == AMPServerBendingX ? kB6XEventLogUrl : kOriginalEventLogUrl;
+            kAMPEventLogEuUrl = serverType == AMPServerBendingX ? kB6XEventLogEuUrl : kOriginalEventLogEuUrl;
+        });
 
         [self runOnBackgroundQueue:^{
             self->_deviceInfo = [[AMPDeviceInfo alloc] init];

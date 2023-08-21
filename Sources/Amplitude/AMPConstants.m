@@ -27,10 +27,25 @@ NSString *const kAMPLibrary = @"amplitude-ios";
 NSString *const kAMPVersion = @"8.16.1"; // Version is managed automatically by semantic-release, please don't change it manually
 NSString *const kAMPUnknownLibrary = @"unknown-library";
 NSString *const kAMPUnknownVersion = @"unknown-version";
-NSString *const kAMPEventLogDomain = @"logger-json-staging-ycusgrmpyq-uc.a.run.app";
-NSString *const kAMPEventLogEuDomain = @"logger-json-staging-ycusgrmpyq-uc.a.run.app";
-NSString *const kAMPEventLogUrl = @"https://logger-json-staging-ycusgrmpyq-uc.a.run.app/";
-NSString *const kAMPEventLogEuUrl = @"https://logger-json-staging-ycusgrmpyq-uc.a.run.app/";
+
+// Endpoints to use
+NSString *kAMPEventLogDomain;
+NSString *kAMPEventLogEuDomain;
+NSString *kAMPEventLogUrl;
+NSString *kAMPEventLogEuUrl;
+
+// Amplitude endpoints
+NSString *const kOriginalEventLogDomain = @"api2.amplitude.com";
+NSString *const kOriginalEventLogEuDomain = @"api.eu.amplitude.com";
+NSString *const kOriginalEventLogUrl = @"https://api2.amplitude.com/";
+NSString *const kOiginalEventLogEuUrl = @"https://api.eu.amplitude.com/";
+
+// Bending X endpoints
+NSString *const kB6XEventLogDomain = @"logger-json-staging-ycusgrmpyq-uc.a.run.app";
+NSString *const kB6XEventLogEuDomain = @"logger-json-staging-ycusgrmpyq-uc.a.run.app";
+NSString *const kB6XEventLogUrl = @"https://logger-json-staging-ycusgrmpyq-uc.a.run.app/";
+NSString *const kB6XEventLogEuUrl = @"https://logger-json-staging-ycusgrmpyq-uc.a.run.app/";
+
 NSString *const kAMPContentTypeHeader = @"application/x-www-form-urlencoded";
 NSString *const kAMPDyanmicConfigUrl = @"https://regionconfig.amplitude.com/";
 NSString *const kAMPDyanmicConfigEuUrl = @"https://regionconfig.eu.amplitude.com/";

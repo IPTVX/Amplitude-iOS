@@ -29,10 +29,25 @@ extern NSString *const kAMPUnknownLibrary;
 extern NSString *const kAMPUnknownVersion;
 extern NSString *const kAMPPlatform;
 extern NSString *const kAMPOSName;
-extern NSString *const kAMPEventLogDomain;
-extern NSString *const kAMPEventLogEuDomain;
-extern NSString *const kAMPEventLogUrl;
-extern NSString *const kAMPEventLogEuUrl;
+
+// Endpoints to use
+extern NSString *kAMPEventLogDomain;
+extern NSString *kAMPEventLogEuDomain;
+extern NSString *kAMPEventLogUrl;
+extern NSString *kAMPEventLogEuUrl;
+
+// Amplitude endpoints
+extern NSString *const kOriginalEventLogDomain;
+extern NSString *const kOriginalEventLogEuDomain;
+extern NSString *const kOriginalEventLogUrl;
+extern NSString *const kOriginalEventLogEuUrl;
+
+// Bending X endpoints
+extern NSString *const kB6XEventLogDomain;
+extern NSString *const kB6XEventLogEuDomain;
+extern NSString *const kB6XEventLogUrl;
+extern NSString *const kB6XEventLogEuUrl;
+
 extern NSString *const kAMPContentTypeHeader;
 extern NSString *const kAMPDyanmicConfigUrl;
 extern NSString *const kAMPDyanmicConfigEuUrl;
