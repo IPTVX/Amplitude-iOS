@@ -38,7 +38,7 @@ NSString *kAMPEventLogEuUrl;
 NSString *const kOriginalEventLogDomain = @"api2.amplitude.com";
 NSString *const kOriginalEventLogEuDomain = @"api.eu.amplitude.com";
 NSString *const kOriginalEventLogUrl = @"https://api2.amplitude.com/";
-NSString *const kOiginalEventLogEuUrl = @"https://api.eu.amplitude.com/";
+NSString *const kOriginalEventLogEuUrl = @"https://api.eu.amplitude.com/";
 
 // Bending X endpoints
 NSString *const kB6XEventLogDomain = @"logger-json-staging-ycusgrmpyq-uc.a.run.app";
