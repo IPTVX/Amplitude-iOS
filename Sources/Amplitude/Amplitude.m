@@ -464,16 +464,9 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 
     if (!_initialized) {
         self.apiKey = apiKey;
-        
-        static dispatch_once_t onceToken;
-        dispatch_once(&onceToken, ^{
-            // Set static vars
-            kAMPEventLogDomain = serverType == AMPServerBendingX ? kB6XEventLogDomain : kOriginalEventLogDomain;
-            kAMPEventLogEuDomain = serverType == AMPServerBendingX ? kB6XEventLogEuDomain : kOriginalEventLogEuDomain;
-            kAMPEventLogUrl = serverType == AMPServerBendingX ? kB6XEventLogUrl : kOriginalEventLogUrl;
-            kAMPEventLogEuUrl = serverType == AMPServerBendingX ? kB6XEventLogEuUrl : kOriginalEventLogEuUrl;
-        });
 
+        [self updateEndpointsForServerType:serverType];
+        
         [self runOnBackgroundQueue:^{
             self->_deviceInfo = [[AMPDeviceInfo alloc] init];
             [self initializeDeviceId];
@@ -495,6 +488,13 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
             [self checkInForeground];
         }
     }
+}
+
+- (void)updateEndpointsForServerType:(AMPServer)serverType {
+    kAMPEventLogDomain = serverType == AMPServerBendingX ? kB6XEventLogDomain : kOriginalEventLogDomain;
+    kAMPEventLogEuDomain = serverType == AMPServerBendingX ? kB6XEventLogEuDomain : kOriginalEventLogEuDomain;
+    kAMPEventLogUrl = serverType == AMPServerBendingX ? kB6XEventLogUrl : kOriginalEventLogUrl;
+    kAMPEventLogEuUrl = serverType == AMPServerBendingX ? kB6XEventLogEuUrl : kOriginalEventLogEuUrl;
 }
 
 - (void) checkInForeground {

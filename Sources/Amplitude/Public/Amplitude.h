@@ -265,6 +265,9 @@ typedef void (^AMPInitCompletionBlock)(void);
 
 */
 - (void)initializeApiKey:(NSString *)apiKey userId:(NSString *)userId serverType:(AMPServer)serverType;
+
+- (void)updateEndpointsForServerType:(AMPServer)serverType;
+
 /**
 * Manually check in and set the forground related settings including dynamic config and sesstion. Need to be called manually when onEnterForeground if  deferCheckInForeground = true.
 */
