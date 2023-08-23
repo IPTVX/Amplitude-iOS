@@ -495,6 +495,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     kAMPEventLogEuDomain = serverType == AMPServerBendingX ? kB6XEventLogEuDomain : kOriginalEventLogEuDomain;
     kAMPEventLogUrl = serverType == AMPServerBendingX ? kB6XEventLogUrl : kOriginalEventLogUrl;
     kAMPEventLogEuUrl = serverType == AMPServerBendingX ? kB6XEventLogEuUrl : kOriginalEventLogEuUrl;
+    _serverUrl = kAMPEventLogUrl;
 }
 
 - (void) checkInForeground {
