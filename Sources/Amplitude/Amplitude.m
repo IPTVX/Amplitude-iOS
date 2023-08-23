@@ -494,7 +494,9 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     kAMPEventLogUrl = serverType == AMPServerBendingX ? kB6XEventLogUrl : kOriginalEventLogUrl;
     kAMPEventLogEuUrl = serverType == AMPServerBendingX ? kB6XEventLogEuUrl : kOriginalEventLogEuUrl;
     _serverUrl = kAMPEventLogUrl;
+#if AMPLITUDE_SSL_PINNING
     [[AMPURLSession sharedSession] updateCertificateAndURLSessionsSettings];
+#endif
     [[AMPConfigManager sharedInstance] updateIngestionPoint];
 }
 
