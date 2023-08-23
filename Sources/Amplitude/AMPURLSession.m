@@ -59,22 +59,27 @@
 
 - (instancetype)init {
     if ((self = [super init])) {
-        // ComodoRsaDomainValidationCA is for US endpoint, AmazonRootCA1 is for EU endpoint
-        NSDictionary *domainCertFilenamesMap = @{
-            kAMPEventLogDomain: @[
-                @"ComodoRsaDomainValidationCA.der",
-                @"Amplitude_Amplitude.bundle/ComodoRsaDomainValidationCA.der"
-            ],
-            kAMPEventLogEuDomain: @[
-                @"AmazonRootCA1.cer",
-                @"Amplitude_Amplitude.bundle/AmazonRootCA1.cer"
-            ]
-        };
-        [AMPURLSession pinSSLCertificate:domainCertFilenamesMap];
+        [self updateCertificateAndURLSessionsSettings];
         NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
         _sharedSession = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
     }
     return self;
+}
+
+- (void)updateCertificateAndURLSessionsSettings
+{
+    // ComodoRsaDomainValidationCA is for US endpoint, AmazonRootCA1 is for EU endpoint
+    NSDictionary *domainCertFilenamesMap = @{
+        kAMPEventLogDomain: @[
+            @"ComodoRsaDomainValidationCA.der",
+            @"Amplitude_Amplitude.bundle/ComodoRsaDomainValidationCA.der"
+        ],
+        kAMPEventLogEuDomain: @[
+            @"AmazonRootCA1.cer",
+            @"Amplitude_Amplitude.bundle/AmazonRootCA1.cer"
+        ]
+    };
+    [AMPURLSession pinSSLCertificate:domainCertFilenamesMap];
 }
 
 + (void)pinSSLCertificate:(NSDictionary *)domainCertFilenamesMap {

@@ -60,7 +60,6 @@
 #import "AMPTrackingOptions.h"
 #import "AMPPlan.h"
 #import "AMPIngestionMetadata.h"
-#import "AMPServerZone.h"
 #import "AMPServerZoneUtil.h"
 #import "AMPMiddleware.h"
 #import "AMPMiddlewareRunner.h"
@@ -149,7 +148,6 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     NSString *_token;
     AMPPlan *_plan;
     AMPIngestionMetadata *_ingestionMetadata;
-    AMPServerZone _serverZone;
     AMPMiddlewareRunner *_middlewareRunner;
     AMPIdentifyInterceptor *_identifyInterceptor;
 }
@@ -496,6 +494,8 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     kAMPEventLogUrl = serverType == AMPServerBendingX ? kB6XEventLogUrl : kOriginalEventLogUrl;
     kAMPEventLogEuUrl = serverType == AMPServerBendingX ? kB6XEventLogEuUrl : kOriginalEventLogEuUrl;
     _serverUrl = kAMPEventLogUrl;
+    [[AMPURLSession sharedInstance] updateCertificateAndURLSessionsSettings];
+    [[AMPConfigManager sharedInstance] updateIngestionPoint];
 }
 
 - (void) checkInForeground {

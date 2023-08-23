@@ -7,10 +7,12 @@
 //
 
 #import "Amplitude.h"
+#import "AMPServerZone.h"
 
 @interface Amplitude ()
 
 @property (nonatomic, copy, readwrite) NSString *apiKey;
 @property (nonatomic, copy, readwrite) NSString *instanceName;
+@property (nonatomic, readonly) AMPServerZone serverZone;
 
 @end

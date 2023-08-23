@@ -32,6 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (instancetype)sharedInstance;
 - (void)refresh:(void(^)(void))completionHandler serverZone:(AMPServerZone)serverZone;
+- (void)updateIngestionPoint;
 
 @end
 

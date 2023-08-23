@@ -25,6 +25,7 @@
 #import "AMPConstants.h"
 #import "AMPServerZone.h"
 #import "AMPServerZoneUtil.h"
+#import "AmplitudePrivate.h"
 
 @interface AMPConfigManager ()
 
@@ -48,6 +49,11 @@
         self.ingestionEndpoint = kAMPEventLogUrl;
     }
     return self;
+}
+
+- (void)updateIngestionPoint
+{
+    self.ingestionEndpoint = [AMPServerZoneUtil getEventLogApi:[Amplitude instance].serverZone];
 }
 
 - (void)refresh:(void(^)(void))completionHandler serverZone:(AMPServerZone)serverZone {

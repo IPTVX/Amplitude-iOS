@@ -207,6 +207,7 @@ typedef void (^AMPInitCompletionBlock)(void);
  */
 @property (nonatomic, assign) BOOL deferCheckInForeground;
 
+
 #pragma mark - Methods
 
 /**-----------------------------------------------------------------------------
