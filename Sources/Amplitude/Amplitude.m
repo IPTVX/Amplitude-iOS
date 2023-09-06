@@ -621,18 +621,10 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
         timestamp = [NSNumber numberWithLongLong:[[self currentTime] timeIntervalSince1970] * 1000];
     }
 
-    if (_commonProperties.count || _userId.length) {
+    if (_commonProperties.count) {
         // Add common properties if they exists
         NSMutableDictionary *mutEventProperties = [eventProperties mutableCopy];
-        
-        if (_commonProperties.count) {
-            [mutEventProperties addEntriesFromDictionary:_commonProperties];
-        }
-        
-        if (_userId.length) {
-            mutEventProperties[@"user_id"] = _userId;
-        }
-        
+        [mutEventProperties addEntriesFromDictionary:_commonProperties];
         eventProperties = [mutEventProperties copy];
     } else {
         // Create snapshot of all event json objects, to prevent deallocation crash
