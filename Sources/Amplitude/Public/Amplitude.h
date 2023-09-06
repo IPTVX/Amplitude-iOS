@@ -77,6 +77,11 @@ typedef void (^AMPInitCompletionBlock)(void);
 @property (nonatomic, copy, readonly, nullable) NSString *userId;
 
 /**
+ Properties to add to each event.
+ */
+@property (nonatomic, copy, nullable) NSDictionary<NSString *, NSObject <NSCopying, NSSecureCoding> *> *commonProperties;
+
+/**
  Identifier for the current device.
  */
 @property (nonatomic, copy, readonly) NSString *deviceId;

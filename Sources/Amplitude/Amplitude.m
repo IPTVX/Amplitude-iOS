@@ -621,8 +621,16 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
         timestamp = [NSNumber numberWithLongLong:[[self currentTime] timeIntervalSince1970] * 1000];
     }
 
-    // Create snapshot of all event json objects, to prevent deallocation crash
-    eventProperties = [eventProperties copy];
+    if (_commonProperties.count) {
+        // Add common properties if they exists
+        NSMutableDictionary *mutEventProperties = [eventProperties mutableCopy];
+        [mutEventProperties addEntriesFromDictionary:_commonProperties];
+        eventProperties = [mutEventProperties copy];
+    } else {
+        // Create snapshot of all event json objects, to prevent deallocation crash
+        eventProperties = [eventProperties copy];
+    }
+    
     apiProperties = [apiProperties mutableCopy];
     userProperties = [userProperties copy];
     groups = [groups copy];
