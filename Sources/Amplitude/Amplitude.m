@@ -623,7 +623,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 
     if (_commonProperties.count) {
         // Add common properties if they exists
-        NSMutableDictionary *mutEventProperties = [eventProperties mutableCopy];
+        NSMutableDictionary *mutEventProperties = [eventProperties mutableCopy] ?: [NSMutableDictionary new];
         [mutEventProperties addEntriesFromDictionary:_commonProperties];
         eventProperties = [mutEventProperties copy];
     } else {
