@@ -210,6 +210,8 @@ typedef void (^AMPInitCompletionBlock)(void);
 
 #pragma mark - Methods
 
+- (instancetype)init NS_UNAVAILABLE;
+
 /**-----------------------------------------------------------------------------
  * @name Fetching Amplitude SDK instance
  * -----------------------------------------------------------------------------

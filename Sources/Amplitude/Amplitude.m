@@ -158,7 +158,9 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 
 + (Amplitude *)instanceWithServerURLString:(NSString *)serverURLString
                      europeServerURLString:(NSString *)europeServerURLString {
-    return [Amplitude instanceWithName:nil];
+    return [Amplitude instanceWithName:nil
+                       serverURLString:serverURLString
+                 europeServerURLString:europeServerURLString];
 }
 
 + (Amplitude *)instanceWithName:(NSString *)instanceName 
@@ -167,7 +169,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     static NSMutableDictionary *_instances = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _instances = [[NSMutableDictionary alloc] init];
+        _instances = [[NSMutableDictionary alloc] initWith];
     });
 
     // compiler wants explicit key nil check even though AMPUtils isEmptyString already has one
@@ -175,12 +177,14 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
         instanceName = kAMPDefaultInstance;
     }
     instanceName = [instanceName lowercaseString];
-
+    
     Amplitude *client = nil;
     @synchronized(_instances) {
         client = [_instances objectForKey:instanceName];
         if (client == nil) {
-            client = [[self alloc] initWithInstanceName:instanceName];
+            client = [[self alloc] initWithInstanceName:instanceName
+                                        serverURLString:serverURLString
+                                  europeServerURLString:europeServerURLString];
             [_instances setObject:client forKey:instanceName];
         }
     }
@@ -189,9 +193,18 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 }
 
 #pragma mark - Main class methods
+- (instancetype)init {
+    // You can raise an exception or handle the situation in another way
+    [NSException raise:NSInternalInconsistencyException
+                format:@"The 'init' method is not available for this class. Use a designated initializer."];
+    return nil;
+}
+
 - (instancetype)initWithserverURLString:(NSString *)serverURLString
-              europeServerURLString:(NSString *)europeServerURLString {
-    return [self initWithInstanceName:nil];
+                  europeServerURLString:(NSString *)europeServerURLString {
+    return [self initWithInstanceName:nil
+                      serverURLString:serverURLString
+                europeServerURLString:europeServerURLString];
 }
 
 - (instancetype)initWithInstanceName:(NSString *)instanceName 
@@ -429,18 +442,16 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     [self removeObservers];
 }
 
-- (void)initializeApiKey:(NSString *)apiKey
-              serverType:(AMPServer)serverType {
-    [self initializeApiKey:apiKey userId:nil setUserId:NO serverType:serverType];
+- (void)initializeApiKey:(NSString *)apiKey {
+    [self initializeApiKey:apiKey userId:nil setUserId:NO];
 }
 
 /**
  * Initialize Amplitude with a given apiKey and userId.
  */
 - (void)initializeApiKey:(NSString *)apiKey
-                  userId:(NSString *)userId
-              serverType:(AMPServer)serverType {
-    [self initializeApiKey:apiKey userId:userId setUserId:YES serverType:serverType];
+                  userId:(NSString *)userId {
+    [self initializeApiKey:apiKey userId:userId setUserId:YES];
 }
 
 /**
@@ -449,8 +460,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
  */
 - (void)initializeApiKey:(NSString *)apiKey
                   userId:(NSString *)userId
-               setUserId:(BOOL)setUserId
-              serverType:(AMPServer)serverType {
+               setUserId:(BOOL)setUserId {
     if (apiKey == nil) {
         AMPLITUDE_ERROR(@"ERROR: apiKey cannot be nil in initializeApiKey:");
         return;
@@ -497,7 +507,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 - (void)updateEndpointsForServerURLString:(NSString *)serverURLString
                     europeServerURLString:(NSString *)europeServerURLString
 {
-    NSURL *url = [NSURL URLWithString:urlString];
+    NSURL *url = [NSURL URLWithString:serverURLString];
     NSString *host = [url host];
     if ([host hasSuffix:@"/"]) {
         host = [host substringToIndex:[host length] - 1];
