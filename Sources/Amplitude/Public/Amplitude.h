@@ -237,8 +237,8 @@ typedef void (^AMPInitCompletionBlock)(void);
  @see [Tracking Events to Multiple Amplitude Apps](https://github.com/amplitude/amplitude-ios#tracking-events-to-multiple-amplitude-apps)
  */
 + (nullable Amplitude *)instanceWithName:(nullable NSString *)instanceName
-                serverURLString:(NSString *)serverURLString
-          europeServerURLString:(NSString *)europeServerURLString;
+                serverURLString:(nullable NSString *)serverURLString
+          europeServerURLString:(nullable NSString *)europeServerURLString;
 
 /**-----------------------------------------------------------------------------
  * @name Initialize the Amplitude SDK with your Amplitude API Key

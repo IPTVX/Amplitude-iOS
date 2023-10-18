@@ -40,6 +40,10 @@ NSString *const kOriginalEventLogEuDomain = @"api.eu.amplitude.com";
 NSString *const kOriginalEventLogUrl = @"https://api2.amplitude.com/";
 NSString *const kOriginalEventLogEuUrl = @"https://api.eu.amplitude.com/";
 
+NSString *const kAMPContentTypeHeader = @"application/x-www-form-urlencoded";
+NSString *const kAMPDyanmicConfigUrl = @"https://regionconfig.amplitude.com/";
+NSString *const kAMPDyanmicConfigEuUrl = @"https://regionconfig.eu.amplitude.com/";
+NSString *const kAMPDefaultInstance = @"$default_instance";
 const int kAMPApiVersion = 3;
 const int kAMPDBVersion = 4;
 const int kAMPDBFirstVersion = 2; // to detect if DB exists yet
