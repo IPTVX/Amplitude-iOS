@@ -233,7 +233,7 @@ typedef void (^AMPInitCompletionBlock)(void);
 
  @see [Tracking Events to Multiple Amplitude Apps](https://github.com/amplitude/amplitude-ios#tracking-events-to-multiple-amplitude-apps)
  */
-+ (Amplitude *)instanceWithName:(NSString *)instanceName
++ (Amplitude *)instanceWithName:(nullable NSString *)instanceName
                 serverURLString:(NSString *)serverURLString
           europeServerURLString:(NSString *)europeServerURLString;
 

@@ -163,13 +163,13 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
                  europeServerURLString:europeServerURLString];
 }
 
-+ (Amplitude *)instanceWithName:(NSString *)instanceName 
++ (Amplitude *)instanceWithName:(nullable NSString *)instanceName 
                 serverURLString:(NSString *)serverURLString
           europeServerURLString:(NSString *)europeServerURLString {
     static NSMutableDictionary *_instances = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _instances = [[NSMutableDictionary alloc] initWith];
+        _instances = [[NSMutableDictionary alloc] init];
     });
 
     // compiler wants explicit key nil check even though AMPUtils isEmptyString already has one
@@ -200,7 +200,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     return nil;
 }
 
-- (instancetype)initWithserverURLString:(NSString *)serverURLString
+- (instancetype)initWithServerURLString:(NSString *)serverURLString
                   europeServerURLString:(NSString *)europeServerURLString {
     return [self initWithInstanceName:nil
                       serverURLString:serverURLString
