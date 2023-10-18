@@ -36,18 +36,6 @@ extern NSString *kAMPEventLogEuDomain;
 extern NSString *kAMPEventLogUrl;
 extern NSString *kAMPEventLogEuUrl;
 
-// Amplitude endpoints
-extern NSString *const kOriginalEventLogDomain;
-extern NSString *const kOriginalEventLogEuDomain;
-extern NSString *const kOriginalEventLogUrl;
-extern NSString *const kOriginalEventLogEuUrl;
-
-// Bending X endpoints
-extern NSString *const kB6XEventLogDomain;
-extern NSString *const kB6XEventLogEuDomain;
-extern NSString *const kB6XEventLogUrl;
-extern NSString *const kB6XEventLogEuUrl;
-
 extern NSString *const kAMPContentTypeHeader;
 extern NSString *const kAMPDyanmicConfigUrl;
 extern NSString *const kAMPDyanmicConfigEuUrl;

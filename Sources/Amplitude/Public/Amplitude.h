@@ -32,11 +32,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NS_ENUM(NSUInteger, AMPServer) {
-    AMPServerAmplitude,
-    AMPServerBendingX,
-};
-
 typedef NSString *_Nonnull (^AMPAdSupportBlock)(void);
 typedef NSDictionary *_Nullable (^AMPLocationInfoBlock)(void);
 typedef void (^AMPInitCompletionBlock)(void);
@@ -225,8 +220,8 @@ typedef void (^AMPInitCompletionBlock)(void);
 
  @returns the default Amplitude SDK instance
  */
-+ (Amplitude *)instance;
-
++ (Amplitude *)instanceWithServerURLString:(NSString *)serverURLString
+                     europeServerURLString:(NSString *)europeServerURLString;
 /**
  This fetches a named SDK instance. Use this if logging events to multiple Amplitude apps.
 
@@ -236,7 +231,9 @@ typedef void (^AMPInitCompletionBlock)(void);
 
  @see [Tracking Events to Multiple Amplitude Apps](https://github.com/amplitude/amplitude-ios#tracking-events-to-multiple-amplitude-apps)
  */
-+ (Amplitude *)instanceWithName:(nullable NSString *)instanceName;
++ (Amplitude *)instanceWithName:(NSString *)instanceName
+                serverURLString:(NSString *)serverURLString
+          europeServerURLString:(NSString *)europeServerURLString;
 
 /**-----------------------------------------------------------------------------
  * @name Initialize the Amplitude SDK with your Amplitude API Key
@@ -251,10 +248,8 @@ typedef void (^AMPInitCompletionBlock)(void);
  **Note:** this is required before you can log any events.
 
  @param apiKey Your Amplitude key obtained from your dashboard at https://amplitude.com/settings
- 
- @param serverType decide if initialize it with original Amplitude endpoints or Bending X
- */
-- (void)initializeApiKey:(NSString *)apiKey serverType:(AMPServer)serverType;
+  */
+- (void)initializeApiKey:(NSString *)apiKey;
 
 /**
  Initializes the Amplitude instance with your Amplitude API key and sets a user identifier for the current user.
@@ -267,13 +262,11 @@ typedef void (^AMPInitCompletionBlock)(void);
 
  @param userId If your app has its own login system that you want to track users with, you can set the userId.
  
- @param serverType decide if initialize it with original Amplitude endpoints or Bending X
-
 */
-- (void)initializeApiKey:(NSString *)apiKey userId:(NSString *)userId serverType:(AMPServer)serverType;
+- (void)initializeApiKey:(NSString *)apiKey userId:(NSString *)userId;
 
-- (void)updateEndpointsForServerType:(AMPServer)serverType;
-
+- (void)updateEndpointsForServerURLString:(NSString *)serverURLString
+                    europeServerURLString:(NSString *)europeServerURLString;
 /**
 * Manually check in and set the forground related settings including dynamic config and sesstion. Need to be called manually when onEnterForeground if  deferCheckInForeground = true.
 */

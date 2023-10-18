@@ -40,16 +40,6 @@ NSString *const kOriginalEventLogEuDomain = @"api.eu.amplitude.com";
 NSString *const kOriginalEventLogUrl = @"https://api2.amplitude.com/";
 NSString *const kOriginalEventLogEuUrl = @"https://api.eu.amplitude.com/";
 
-// Bending X endpoints
-NSString *const kB6XEventLogDomain = @"logger-json-staging-ycusgrmpyq-uc.a.run.app";
-NSString *const kB6XEventLogEuDomain = @"logger-json-staging-ycusgrmpyq-uc.a.run.app";
-NSString *const kB6XEventLogUrl = @"https://logger-json-staging-ycusgrmpyq-uc.a.run.app/";
-NSString *const kB6XEventLogEuUrl = @"https://logger-json-staging-ycusgrmpyq-uc.a.run.app/";
-
-NSString *const kAMPContentTypeHeader = @"application/x-www-form-urlencoded";
-NSString *const kAMPDyanmicConfigUrl = @"https://regionconfig.amplitude.com/";
-NSString *const kAMPDyanmicConfigEuUrl = @"https://regionconfig.eu.amplitude.com/";
-NSString *const kAMPDefaultInstance = @"$default_instance";
 const int kAMPApiVersion = 3;
 const int kAMPDBVersion = 4;
 const int kAMPDBFirstVersion = 2; // to detect if DB exists yet

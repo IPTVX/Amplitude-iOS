@@ -156,11 +156,14 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 #pragma mark - Static methods
 
-+ (Amplitude *)instance {
++ (Amplitude *)instanceWithServerURLString:(NSString *)serverURLString
+                     europeServerURLString:(NSString *)europeServerURLString {
     return [Amplitude instanceWithName:nil];
 }
 
-+ (Amplitude *)instanceWithName:(NSString *)instanceName {
++ (Amplitude *)instanceWithName:(NSString *)instanceName 
+                serverURLString:(NSString *)serverURLString
+          europeServerURLString:(NSString *)europeServerURLString {
     static NSMutableDictionary *_instances = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -186,17 +189,22 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 }
 
 #pragma mark - Main class methods
-- (instancetype)init {
+- (instancetype)initWithserverURLString:(NSString *)serverURLString
+              europeServerURLString:(NSString *)europeServerURLString {
     return [self initWithInstanceName:nil];
 }
 
-- (instancetype)initWithInstanceName:(NSString *)instanceName {
+- (instancetype)initWithInstanceName:(NSString *)instanceName 
+                     serverURLString:(NSString *)serverURLString
+               europeServerURLString:(NSString *)europeServerURLString {
     if ([AMPUtils isEmptyString:instanceName]) {
         instanceName = kAMPDefaultInstance;
     }
     instanceName = [instanceName lowercaseString];
 
     if ((self = [super init])) {
+        [self updateEndpointsForServerURLString:serverURLString
+                          europeServerURLString:europeServerURLString];
 
 #if AMPLITUDE_SSL_PINNING
         _sslPinningEnabled = YES;
@@ -462,8 +470,6 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 
     if (!_initialized) {
         self.apiKey = apiKey;
-
-        [self updateEndpointsForServerType:serverType];
         
         [self runOnBackgroundQueue:^{
             self->_deviceInfo = [[AMPDeviceInfo alloc] init];
@@ -488,12 +494,32 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     }
 }
 
-- (void)updateEndpointsForServerType:(AMPServer)serverType {
-    kAMPEventLogDomain = serverType == AMPServerBendingX ? kB6XEventLogDomain : kOriginalEventLogDomain;
-    kAMPEventLogEuDomain = serverType == AMPServerBendingX ? kB6XEventLogEuDomain : kOriginalEventLogEuDomain;
-    kAMPEventLogUrl = serverType == AMPServerBendingX ? kB6XEventLogUrl : kOriginalEventLogUrl;
-    kAMPEventLogEuUrl = serverType == AMPServerBendingX ? kB6XEventLogEuUrl : kOriginalEventLogEuUrl;
-    _serverUrl = kAMPEventLogUrl;
+- (void)updateEndpointsForServerURLString:(NSString *)serverURLString
+                    europeServerURLString:(NSString *)europeServerURLString
+{
+    NSURL *url = [NSURL URLWithString:urlString];
+    NSString *host = [url host];
+    if ([host hasSuffix:@"/"]) {
+        host = [host substringToIndex:[host length] - 1];
+    }
+    
+    NSString *euHost;
+    if ([europeServerURLString isEqualToString:serverURLString]) {
+        euHost = host;
+    } else {
+        NSURL *euURL = [NSURL URLWithString:europeServerURLString];
+        euHost = [euURL host];
+        if ([euHost hasSuffix:@"/"]) {
+            euHost = [euHost substringToIndex:[euHost length] - 1];
+        }
+    }
+    
+    kAMPEventLogDomain = host;
+    kAMPEventLogEuDomain = euHost;
+    kAMPEventLogUrl = serverURLString;
+    kAMPEventLogEuUrl = europeServerURLString;
+    
+    _serverUrl = serverURLString;
 #if AMPLITUDE_SSL_PINNING
     [[AMPURLSession sharedSession] updateCertificateAndURLSessionsSettings];
 #endif
