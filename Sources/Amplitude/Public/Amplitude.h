@@ -217,12 +217,15 @@ typedef void (^AMPInitCompletionBlock)(void);
  * -----------------------------------------------------------------------------
  */
 
+/** Only used for existing default instace. */
++ (nullable Amplitude *)instance;
+
 /**
  This fetches the default SDK instance. Recommended if you are only logging events to a single app.
 
  @returns the default Amplitude SDK instance
  */
-+ (Amplitude *)instanceWithServerURLString:(NSString *)serverURLString
++ (nullable Amplitude *)instanceWithServerURLString:(NSString *)serverURLString
                      europeServerURLString:(NSString *)europeServerURLString;
 /**
  This fetches a named SDK instance. Use this if logging events to multiple Amplitude apps.
@@ -233,7 +236,7 @@ typedef void (^AMPInitCompletionBlock)(void);
 
  @see [Tracking Events to Multiple Amplitude Apps](https://github.com/amplitude/amplitude-ios#tracking-events-to-multiple-amplitude-apps)
  */
-+ (Amplitude *)instanceWithName:(nullable NSString *)instanceName
++ (nullable Amplitude *)instanceWithName:(nullable NSString *)instanceName
                 serverURLString:(NSString *)serverURLString
           europeServerURLString:(NSString *)europeServerURLString;
 

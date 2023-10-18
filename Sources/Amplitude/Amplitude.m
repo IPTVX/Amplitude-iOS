@@ -156,16 +156,21 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 #pragma mark - Static methods
 
-+ (Amplitude *)instanceWithServerURLString:(NSString *)serverURLString
+// Only used for existing default instace
++ (nullable Amplitude *)instance {
+    return [self instanceWithName:nil serverURLString:nil europeServerURLString:nil];
+}
+
++ (nullable Amplitude *)instanceWithServerURLString:(NSString *)serverURLString
                      europeServerURLString:(NSString *)europeServerURLString {
     return [Amplitude instanceWithName:nil
                        serverURLString:serverURLString
                  europeServerURLString:europeServerURLString];
 }
 
-+ (Amplitude *)instanceWithName:(nullable NSString *)instanceName 
-                serverURLString:(NSString *)serverURLString
-          europeServerURLString:(NSString *)europeServerURLString {
++ (nullable Amplitude *)instanceWithName:(nullable NSString *)instanceName
+                serverURLString:(nullable NSString *)serverURLString
+          europeServerURLString:(nullable NSString *)europeServerURLString {
     static NSMutableDictionary *_instances = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -182,6 +187,9 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     @synchronized(_instances) {
         client = [_instances objectForKey:instanceName];
         if (client == nil) {
+            if (serverURLString == nil) {
+                return nil;
+            }
             client = [[self alloc] initWithInstanceName:instanceName
                                         serverURLString:serverURLString
                                   europeServerURLString:europeServerURLString];
