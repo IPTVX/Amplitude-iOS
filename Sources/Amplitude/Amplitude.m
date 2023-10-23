@@ -65,6 +65,11 @@
 #import "AMPMiddlewareRunner.h"
 #import "AMPIdentifyInterceptor.h"
 #import "AMPEventUtils.h"
+
+#if !TARGET_OS_OSX && !TARGET_OS_WATCH
+#import "UIViewController+AMPScreen.h"
+#endif
+
 #import <math.h>
 #import <CommonCrypto/CommonDigest.h>
 
@@ -100,10 +105,6 @@
 @property (nonatomic, copy, readwrite) NSString *contentTypeHeader;
 @end
 
-NSString *const kAMPSessionStartEvent = @"session_start";
-NSString *const kAMPSessionEndEvent = @"session_end";
-NSString *const kAMPRevenueEvent = @"revenue_amount";
-
 static NSString *const BACKGROUND_QUEUE_NAME = @"BACKGROUND";
 static NSString *const DATABASE_VERSION = @"database_version";
 static NSString *const DEVICE_ID = @"device_id";
@@ -116,6 +117,9 @@ static NSString *const MAX_IDENTIFY_ID = @"max_identify_id";
 static NSString *const OPT_OUT = @"opt_out";
 static NSString *const USER_ID = @"user_id";
 static NSString *const SEQUENCE_NUMBER = @"sequence_number";
+// for app lifecycle events
+static NSString *const APP_VERSION = @"app_version";
+static NSString *const APP_BUILD = @"app_build";
 
 
 @implementation Amplitude {
@@ -139,7 +143,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 
     BOOL _inForeground;
     BOOL _offline;
-    
+
     int _numRetries;
     int _maxRetries;
     int _originalUploadPeriodsInSeconds;
@@ -267,6 +271,8 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
         [[[AnalyticsConnector getInstance:self.instanceName] eventBridge] setEventReceiver:^(AnalyticsEvent * _Nonnull event) {
             [self logEvent:[event eventType] withEventProperties:[event eventProperties] withApiProperties:nil withUserProperties:[event userProperties] withGroups:nil withGroupProperties:nil withTimestamp:nil outOfSession:false];
         }];
+        
+        self.defaultTracking = [[AMPDefaultTrackingOptions alloc] init];
 
         _initializerQueue = [[NSOperationQueue alloc] init];
         _backgroundQueue = [[NSOperationQueue alloc] init];
@@ -430,20 +436,75 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
                    name:NSApplicationDidResignActiveNotification
                  object:nil];
 #endif
+
+#if !TARGET_OS_OSX && !TARGET_OS_WATCH
+    // mount the default events handler
+    UIApplication *app = [AMPUtils getSharedApplication];
+    if (app) {
+        for (NSString *name in @[UIApplicationDidEnterBackgroundNotification,
+                                 UIApplicationDidFinishLaunchingNotification,
+                                 UIApplicationWillEnterForegroundNotification]) {
+            [center addObserver:self selector:@selector(handleAppStateUpdates:) name:name object:app];
+        }
+    }
+#endif
 }
+
+#if !TARGET_OS_OSX && !TARGET_OS_WATCH
+- (void)handleAppStateUpdates:(NSNotification *)notification {
+    // lazy checking the settings here to avoid early init with false value
+    if (!self.defaultTracking.appLifecycles) {
+        return;
+    }
+    if ([notification.name isEqualToString:UIApplicationDidFinishLaunchingNotification]) {
+        NSString *previousBuild = [_dbHelper getValue:APP_BUILD];
+        NSString *previousVersion = [_dbHelper getValue:APP_VERSION];
+        NSString *currentBuild = [[NSBundle mainBundle] infoDictionary][@"CFBundleVersion"];
+        NSString *currentVersion = [[NSBundle mainBundle] infoDictionary][@"CFBundleShortVersionString"];
+        if (!previousBuild) {
+            [self logEvent:kAMPApplicationInstalled withEventProperties:@{
+                kAMPEventPropBuild: currentBuild ?: @"",
+                kAMPEventPropVersion: currentVersion ?: @"",
+            }];
+        } else if (![currentBuild isEqualToString:previousBuild]) {
+            [self logEvent:kAMPApplicationUpdated withEventProperties:@{
+                kAMPEventPropBuild: currentBuild ?: @"",
+                kAMPEventPropVersion: currentVersion ?: @"",
+                kAMPEventPropPreviousBuild: previousBuild ?: @"",
+                kAMPEventPropPreviousVersion: previousVersion ?: @"",
+            }];
+        }
+        [self logEvent:kAMPApplicationOpened withEventProperties:@{
+            kAMPEventPropBuild: currentBuild ?: @"",
+            kAMPEventPropVersion: currentVersion ?: @"",
+            kAMPEventPropFromBackground: @NO,
+        }];
+
+        // persist the build/version when changed
+        if (currentBuild ? ![currentBuild isEqualToString:previousBuild] : (previousBuild != nil)) {
+            [_dbHelper insertOrReplaceKeyValue:APP_BUILD value:currentBuild];
+        }
+        if (currentVersion ? ![currentVersion isEqualToString:previousVersion] : (previousVersion != nil)) {
+            [_dbHelper insertOrReplaceKeyValue:APP_VERSION value:currentVersion];
+        }
+    } else if ([notification.name isEqualToString:UIApplicationWillEnterForegroundNotification]) {
+        NSString *currentBuild = [[NSBundle mainBundle] infoDictionary][@"CFBundleVersion"];
+        NSString *currentVersion = [[NSBundle mainBundle] infoDictionary][@"CFBundleShortVersionString"];
+        [self logEvent:kAMPApplicationOpened withEventProperties:@{
+            kAMPEventPropBuild: currentBuild ?: @"",
+            kAMPEventPropVersion: currentVersion ?: @"",
+            kAMPEventPropFromBackground: @YES,
+        }];
+    } else if ([notification.name isEqualToString:UIApplicationDidEnterBackgroundNotification]) {
+        [self logEvent:kAMPApplicationBackgrounded];
+    }
+}
+#endif
 
 - (void)removeObservers {
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-#if TARGET_OS_WATCH
-    [center removeObserver:self name:AMPAppWillEnterForegroundNotification object:nil];
-    [center removeObserver:self name:AMPAppDidEnterBackgroundNotification object:nil];
-#elif !TARGET_OS_OSX
-    [center removeObserver:self name:UIApplicationWillEnterForegroundNotification object:nil];
-    [center removeObserver:self name:UIApplicationDidEnterBackgroundNotification object:nil];
-#else
-    [center removeObserver:self name:NSApplicationDidBecomeActiveNotification object:nil];
-    [center removeObserver:self name:NSApplicationDidResignActiveNotification object:nil];
-#endif
+    // unregister all observers added by addObservers method
+    [center removeObserver:self];
 }
 
 - (void)dealloc {
@@ -504,6 +565,13 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
             if (self.initCompletionBlock != nil) {
                 self.initCompletionBlock();
             }
+            
+#if !TARGET_OS_OSX && !TARGET_OS_WATCH
+            // Unlike other default events options that can be evaluated later, screenViews has to be evaluated during the actual initialization
+            if (self.defaultTracking.screenViews) {
+                [UIViewController amp_swizzleViewDidAppear];
+            }
+#endif
         }];
 
         if (!self.deferCheckInForeground) {
@@ -689,7 +757,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
         }
 
         // skip session check if logging start_session or end_session events
-        BOOL loggingSessionEvent = self->_trackingSessionEvents && ([eventType isEqualToString:kAMPSessionStartEvent] || [eventType isEqualToString:kAMPSessionEndEvent]);
+        BOOL loggingSessionEvent = (self->_trackingSessionEvents || self.defaultTracking.sessions) && ([eventType isEqualToString:kAMPSessionStartEvent] || [eventType isEqualToString:kAMPSessionEndEvent]);
         if (!loggingSessionEvent && !outOfSession) {
             [self startOrContinueSessionNSNumber:timestamp inForeground:inForeground];
         }
@@ -726,7 +794,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
         }
 
         event = [self->_identifyInterceptor intercept:event];
-        if (event != nil) {
+        if ([event count] != 0) {
             // convert event dictionary to JSON String
             NSError *error = nil;
             NSData *jsonData = [NSJSONSerialization dataWithJSONObject:[AMPUtils makeJSONSerializable:event] options:0 error:&error];
@@ -739,7 +807,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
                 AMPLITUDE_ERROR(@"ERROR: JSONSerializing event type %@ resulted in an NULL string", eventType);
                 return;
             }
-            
+
             if ([eventType isEqualToString:IDENTIFY_EVENT] || [eventType isEqualToString:GROUP_IDENTIFY_EVENT]) {
                 (void) [self.dbHelper addIdentify:jsonString];
             } else {
@@ -898,6 +966,36 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     }
 
     [self logEvent:kAMPRevenueEvent withEventProperties:[revenue toNSDictionary]];
+}
+
+#pragma mark - Deep link methods
+- (void)continueUserActivity:(NSUserActivity *)activity {
+    if (!self.defaultTracking.deepLinks) {
+        return;
+    }
+
+    if ([activity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
+        NSString *urlString = activity.webpageURL.absoluteString;
+        NSString *referrerString = nil;
+        if (@available(iOS 11, tvOS 11.0, macOS 10.13, watchOS 4.0, *)) {
+            referrerString = activity.referrerURL.absoluteString;
+        }
+        [self logEvent:kAMPDeepLinkOpened withEventProperties:@{
+            kAMPEventPropLinkUrl: urlString ?: @"",
+            kAMPEventPropLinkReferrer: referrerString ?: @"",
+        }];
+    }
+}
+
+- (void)openURL:(NSURL *)url {
+    if (!self.defaultTracking.deepLinks) {
+        return;
+    }
+
+    NSString *urlString = url.absoluteString;
+    [self logEvent:kAMPDeepLinkOpened withEventProperties:@{
+        kAMPEventPropLinkUrl: urlString ?: @"",
+    }];
 }
 
 #pragma mark - Upload events
@@ -1074,12 +1172,6 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     [postData appendData:[@"&upload_time=" dataUsingEncoding:NSUTF8StringEncoding]];
     NSString *timestampString = [[NSNumber numberWithLongLong:[[self currentTime] timeIntervalSince1970] * 1000] stringValue];
     [postData appendData:[timestampString dataUsingEncoding:NSUTF8StringEncoding]];
-
-    // Add checksum
-    [postData appendData:[@"&checksum=" dataUsingEncoding:NSUTF8StringEncoding]];
-    NSString *checksumData = [NSString stringWithFormat:@"%@%@%@%@", apiVersionString, self.apiKey, events, timestampString];
-    NSString *checksum = [self md5HexDigest:checksumData];
-    [postData appendData:[checksum dataUsingEncoding:NSUTF8StringEncoding]];
 
     [request setHTTPMethod:@"POST"];
     [request setValue:self.contentTypeHeader forHTTPHeaderField:@"Content-Type"];
@@ -1298,12 +1390,13 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 }
 
 - (void)startNewSession:(NSNumber *)timestamp {
-    if (_trackingSessionEvents) {
+    BOOL loggingSessionEvent = _trackingSessionEvents || self.defaultTracking.sessions;
+    if (loggingSessionEvent) {
         [self sendSessionEvent:kAMPSessionEndEvent];
     }
     [self setSessionId:[timestamp longLongValue]];
     [self refreshSessionTime:timestamp];
-    if (_trackingSessionEvents) {
+    if (loggingSessionEvent) {
         [self sendSessionEvent:kAMPSessionStartEvent];
     }
 }
@@ -1493,7 +1586,8 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     }
 
     [self runOnBackgroundQueue:^{
-        if (startNewSession && self->_trackingSessionEvents) {
+        BOOL loggingSessionEvent = self->_trackingSessionEvents || self.defaultTracking.sessions;
+        if (startNewSession && loggingSessionEvent) {
             [self sendSessionEvent:kAMPSessionEndEvent];
         }
 
@@ -1509,7 +1603,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
             NSNumber *timestamp = [NSNumber numberWithLongLong:[[self currentTime] timeIntervalSince1970] * 1000];
             [self setSessionId:[timestamp longLongValue]];
             [self refreshSessionTime:timestamp];
-            if (self->_trackingSessionEvents) {
+            if (loggingSessionEvent) {
                 [self sendSessionEvent:kAMPSessionStartEvent];
             }
         }
@@ -1740,26 +1834,6 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
         AMPLITUDE_ERROR(@"ERROR: Invalid type argument to method %@, expected %@, received %@, ", methodName, class, [argument class]);
         return NO;
     }
-}
-
-- (NSString *)md5HexDigest:(NSString *)input {
-    const char *str = [input UTF8String];
-    unsigned char result[CC_MD5_DIGEST_LENGTH];
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    // As mentioned by @haoliu-amp in // https://github.com/amplitude/Amplitude-iOS/issues/250#issuecomment-655224554,
-    // > This crypto algorithm is used for our checksum field, actually you don't need to worry about the security concern for that.
-    // > However, we will see if we wanna switch it to SHA256.
-    // Based on this, we can silence the compile warning here until a fix is implemented.
-    CC_MD5(str, (CC_LONG) strlen(str), result);
-#pragma clang diagnostic pop
-
-    NSMutableString *ret = [NSMutableString stringWithCapacity:CC_MD5_DIGEST_LENGTH*2];
-    for(int i = 0; i<CC_MD5_DIGEST_LENGTH; i++) {
-        [ret appendFormat:@"%02x",result[i]];
-    }
-    return ret;
 }
 
 - (NSString *)urlEncodeString:(NSString *)string {

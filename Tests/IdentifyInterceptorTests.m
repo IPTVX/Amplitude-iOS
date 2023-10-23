@@ -12,6 +12,10 @@
 #import "AMPIdentify.h"
 #import "AMPIdentifyInterceptor.h"
 
+@interface AMPIdentifyInterceptor(PrivateTests)
+- (AMPDatabaseHelper *)dbHelper;
+@end
+
 @interface IdentifyInterceptorTests : XCTestCase
 
 @property AMPIdentifyInterceptor *identifyInterceptor;
@@ -76,7 +80,7 @@
 
     event = [self->_identifyInterceptor intercept:event];
 
-    XCTAssertEqual(event, nil);
+    XCTAssertEqual([event count], 0);
     XCTAssertEqual(self->_dbHelper.getIdentifyCount, 0);
     XCTAssertEqual(self->_dbHelper.getInterceptedIdentifyCount, 1);
 
@@ -137,7 +141,7 @@
 
     event1 = [self->_identifyInterceptor intercept:event1];
 
-    XCTAssertNil(event1);
+    XCTAssertEqual([event1 count], 0);
     XCTAssertEqual(self->_dbHelper.getLastSequenceNumber, 1);
     XCTAssertEqual(self->_dbHelper.getInterceptedIdentifyCount, 1);
     XCTAssertEqual(self->_dbHelper.getIdentifyCount, 0);
@@ -179,7 +183,7 @@
 
     event1 = [self->_identifyInterceptor intercept:event1];
 
-    XCTAssertNil(event1);
+    XCTAssertEqual([event1 count], 0);
     XCTAssertEqual(self->_dbHelper.getLastSequenceNumber, 1);
     XCTAssertEqual(self->_dbHelper.getInterceptedIdentifyCount, 1);
     XCTAssertEqual(self->_dbHelper.getIdentifyCount, 0);
@@ -191,7 +195,7 @@
 
     event2 = [self->_identifyInterceptor intercept:event2];
 
-    XCTAssertNil(event2);
+    XCTAssertEqual([event2 count], 0);
     XCTAssertEqual(self->_dbHelper.getLastSequenceNumber, 2);
     XCTAssertEqual(self->_dbHelper.getInterceptedIdentifyCount, 2);
     XCTAssertEqual(self->_dbHelper.getIdentifyCount, 0);
@@ -240,7 +244,7 @@
 
     event1 = [self->_identifyInterceptor intercept:event1];
 
-    XCTAssertNil(event1);
+    XCTAssertEqual([event1 count], 0);
     XCTAssertEqual(self->_dbHelper.getLastSequenceNumber, 1);
     XCTAssertEqual(self->_dbHelper.getInterceptedIdentifyCount, 1);
     XCTAssertEqual(self->_dbHelper.getIdentifyCount, 0);
@@ -252,7 +256,7 @@
 
     event2 = [self->_identifyInterceptor intercept:event2];
 
-    XCTAssertNil(event2);
+    XCTAssertEqual([event2 count], 0);
     XCTAssertEqual(self->_dbHelper.getLastSequenceNumber, 2);
     XCTAssertEqual(self->_dbHelper.getInterceptedIdentifyCount, 2);
     XCTAssertEqual(self->_dbHelper.getIdentifyCount, 0);
@@ -304,7 +308,7 @@
 
     event = [self->_identifyInterceptor intercept:event];
 
-    XCTAssertNil(event);
+    XCTAssertEqual([event count], 0);
     XCTAssertEqual(self->_dbHelper.getLastSequenceNumber, 1);
     XCTAssertEqual(self->_dbHelper.getInterceptedIdentifyCount, 1);
     XCTAssertEqual(self->_dbHelper.getIdentifyCount, 0);
@@ -341,7 +345,7 @@
 
     event1 = [self->_identifyInterceptor intercept:event1];
 
-    XCTAssertNil(event1);
+    XCTAssertEqual([event1 count], 0);
     XCTAssertEqual(self->_dbHelper.getLastSequenceNumber, 1);
     XCTAssertEqual(self->_dbHelper.getInterceptedIdentifyCount, 1);
     XCTAssertEqual(self->_dbHelper.getIdentifyCount, 0);
@@ -353,7 +357,7 @@
 
     event2 = [self->_identifyInterceptor intercept:event2];
 
-    XCTAssertNil(event2);
+    XCTAssertEqual([event2 count], 0);
     XCTAssertEqual(self->_dbHelper.getLastSequenceNumber, 2);
     XCTAssertEqual(self->_dbHelper.getInterceptedIdentifyCount, 2);
     XCTAssertEqual(self->_dbHelper.getIdentifyCount, 0);
@@ -392,7 +396,7 @@
 
     event1 = [self->_identifyInterceptor intercept:event1];
 
-    XCTAssertNil(event1);
+    XCTAssertEqual([event1 count], 0);
     XCTAssertEqual(self->_dbHelper.getLastSequenceNumber, 1);
     XCTAssertEqual(self->_dbHelper.getInterceptedIdentifyCount, 1);
     XCTAssertEqual(self->_dbHelper.getIdentifyCount, 0);
@@ -405,7 +409,7 @@
 
     event2 = [self->_identifyInterceptor intercept:event2];
 
-    XCTAssertNil(event2);
+    XCTAssertEqual([event2 count], 0);
     XCTAssertEqual(self->_dbHelper.getLastSequenceNumber, 2);
     XCTAssertEqual(self->_dbHelper.getInterceptedIdentifyCount, 2);
     XCTAssertEqual(self->_dbHelper.getIdentifyCount, 0);
@@ -450,7 +454,7 @@
 
     event1 = [self->_identifyInterceptor intercept:event1];
 
-    XCTAssertNil(event1);
+    XCTAssertEqual([event1 count], 0);
     XCTAssertEqual(self->_dbHelper.getLastSequenceNumber, 1);
     XCTAssertEqual(self->_dbHelper.getInterceptedIdentifyCount, 1);
     XCTAssertEqual(self->_dbHelper.getIdentifyCount, 0);
@@ -463,7 +467,7 @@
 
     event2 = [self->_identifyInterceptor intercept:event2];
 
-    XCTAssertNil(event2);
+    XCTAssertEqual([event2 count], 0);
     XCTAssertEqual(self->_dbHelper.getLastSequenceNumber, 2);
     XCTAssertEqual(self->_dbHelper.getInterceptedIdentifyCount, 2);
     XCTAssertEqual(self->_dbHelper.getIdentifyCount, 0);
@@ -491,5 +495,18 @@
     XCTAssertTrue([userProperties[AMP_OP_SET][@"set-key"] isEqualToString:@"set-value-a"]);
     XCTAssertTrue([userProperties[AMP_OP_SET][@"set-key-2"] isEqualToString:@"set-value-c"]);
     XCTAssertNil(userProperties[AMP_OP_SET][@"set-key-3"]);
+}
+
+- (void)testDbHelperIsNotReusedAcrossDifferentIdentifyInterceptorInstances {
+    AMPDatabaseHelper *dbHelper1 = [AMPDatabaseHelper getDatabaseHelper:@"dbHelper1"];
+    AMPIdentifyInterceptor *identifyInterceptor1 = [AMPIdentifyInterceptor getIdentifyInterceptor:dbHelper1
+                                                                                  backgroundQueue:[[NSOperationQueue alloc] init]];
+
+    AMPDatabaseHelper *dbHelper2 = [AMPDatabaseHelper getDatabaseHelper:@"dbHelper2"];
+    AMPIdentifyInterceptor *identifyInterceptor2 = [AMPIdentifyInterceptor getIdentifyInterceptor:dbHelper2
+                                                                                  backgroundQueue:[[NSOperationQueue alloc] init]];
+
+    XCTAssertIdentical(identifyInterceptor1.dbHelper, dbHelper1);
+    XCTAssertIdentical(identifyInterceptor2.dbHelper, dbHelper2);
 }
 @end

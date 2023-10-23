@@ -1,3 +1,45 @@
+## [8.17.2](https://github.com/amplitude/Amplitude-iOS/compare/v8.17.1...v8.17.2) (2023-09-15)
+
+
+### Bug Fixes
+
+* fix the compatible issue with macOSSonoma ([#463](https://github.com/amplitude/Amplitude-iOS/issues/463)) ([fd9495f](https://github.com/amplitude/Amplitude-iOS/commit/fd9495f7c3cfcd13047b36b0cebc81bdc0e62731))
+
+## [8.17.1](https://github.com/amplitude/Amplitude-iOS/compare/v8.17.0...v8.17.1) (2023-07-06)
+
+
+### Bug Fixes
+
+* remove MD5 usage ([#456](https://github.com/amplitude/Amplitude-iOS/issues/456)) ([4e2d35f](https://github.com/amplitude/Amplitude-iOS/commit/4e2d35fba1081ebd21124b8a8d3998509129be54))
+
+# [8.17.0](https://github.com/amplitude/Amplitude-iOS/compare/v8.16.4...v8.17.0) (2023-07-05)
+
+
+### Features
+
+* add default events ([#455](https://github.com/amplitude/Amplitude-iOS/issues/455)) ([9bf9664](https://github.com/amplitude/Amplitude-iOS/commit/9bf9664199d9c5ea7367205180e9ee3c52a9aaa7))
+
+## [8.16.4](https://github.com/amplitude/Amplitude-iOS/compare/v8.16.3...v8.16.4) (2023-06-22)
+
+
+### Bug Fixes
+
+* avoid global variables in AMPIdentifyInterceptor to fix missing user properties updates ([#445](https://github.com/amplitude/Amplitude-iOS/issues/445)) ([eb820a2](https://github.com/amplitude/Amplitude-iOS/commit/eb820a254f1e13b617d3c81209f0b307a1f5de8e))
+
+## [8.16.3](https://github.com/amplitude/Amplitude-iOS/compare/v8.16.2...v8.16.3) (2023-06-15)
+
+
+### Bug Fixes
+
+* malloc -> calloc to fix CWE-789 vulnerability ([#449](https://github.com/amplitude/Amplitude-iOS/issues/449)) ([3793d58](https://github.com/amplitude/Amplitude-iOS/commit/3793d58ec1b4091742efa5d01aeffb5e20c67646))
+
+## [8.16.2](https://github.com/amplitude/Amplitude-iOS/compare/v8.16.1...v8.16.2) (2023-06-14)
+
+
+### Bug Fixes
+
+* bump dependencies to fix cocoapods vulnerability ([#448](https://github.com/amplitude/Amplitude-iOS/issues/448)) ([a57f4dc](https://github.com/amplitude/Amplitude-iOS/commit/a57f4dcda90760c7e8244496717155d196f6a9b2))
+
 ## [8.16.1](https://github.com/amplitude/Amplitude-iOS/compare/v8.16.0...v8.16.1) (2023-05-30)
 
 
