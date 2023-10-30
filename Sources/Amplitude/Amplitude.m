@@ -112,6 +112,7 @@ static NSString *const EVENTS = @"events";
 static NSString *const EVENT_ID = @"event_id";
 static NSString *const PREVIOUS_SESSION_ID = @"previous_session_id";
 static NSString *const PREVIOUS_SESSION_TIME = @"previous_session_time";
+static NSString *const PREVIOUS_USER_ID = @"previous_user_id";
 static NSString *const MAX_EVENT_ID = @"max_event_id";
 static NSString *const MAX_IDENTIFY_ID = @"max_identify_id";
 static NSString *const OPT_OUT = @"opt_out";
@@ -219,7 +220,7 @@ static NSString *const APP_BUILD = @"app_build";
                 europeServerURLString:europeServerURLString];
 }
 
-- (instancetype)initWithInstanceName:(NSString *)instanceName 
+- (instancetype)initWithInstanceName:(NSString *)instanceName
                      serverURLString:(NSString *)serverURLString
                europeServerURLString:(NSString *)europeServerURLString {
     if ([AMPUtils isEmptyString:instanceName]) {
@@ -679,15 +680,15 @@ static NSString *const APP_BUILD = @"app_build";
 }
 
 - (void)logEvent:(NSString *)eventType withEventProperties:(nullable NSDictionary *)eventProperties withMiddlewareExtra: (nullable NSMutableDictionary *) extra {
-    [self logEvent:eventType withEventProperties:eventProperties withApiProperties:nil withUserProperties:nil withGroups:nil withGroupProperties:nil withTimestamp:nil outOfSession:NO withMiddlewareExtra:extra];
+    [self logEvent:eventType withEventProperties:eventProperties withApiProperties:nil withUserProperties:nil withGroups:nil withGroupProperties:nil withTimestamp:nil outOfSession:NO forceUserId:nil withMiddlewareExtra:extra];
 }
 
 - (void)logEvent:(NSString *)eventType withEventProperties:(nullable NSDictionary *)eventProperties withUserProperties:(NSDictionary *)userProperties {
-    [self logEvent:eventType withEventProperties:eventProperties withApiProperties:nil withUserProperties:userProperties withGroups:nil withGroupProperties:nil withTimestamp:nil outOfSession:NO withMiddlewareExtra:nil];
+    [self logEvent:eventType withEventProperties:eventProperties withApiProperties:nil withUserProperties:userProperties withGroups:nil withGroupProperties:nil withTimestamp:nil outOfSession:NO forceUserId:nil withMiddlewareExtra:nil];
 }
 
 - (void)logEvent:(NSString *)eventType withEventProperties:(nullable NSDictionary *)eventProperties withUserProperties:(NSDictionary *)userProperties withMiddlewareExtra: (nullable NSMutableDictionary *) extra{
-   [self logEvent:eventType withEventProperties:eventProperties withApiProperties:nil withUserProperties:userProperties withGroups:nil withGroupProperties:nil withTimestamp:nil outOfSession:NO withMiddlewareExtra:extra];
+   [self logEvent:eventType withEventProperties:eventProperties withApiProperties:nil withUserProperties:userProperties withGroups:nil withGroupProperties:nil withTimestamp:nil outOfSession:NO forceUserId:nil withMiddlewareExtra:extra];
 }
 
 - (void)logEvent:(NSString *)eventType withEventProperties:(NSDictionary *)eventProperties outOfSession:(BOOL)outOfSession {
@@ -707,14 +708,18 @@ static NSString *const APP_BUILD = @"app_build";
 }
 
 - (void)logEvent:(NSString *)eventType withEventProperties:(NSDictionary *)eventProperties withGroups:(NSDictionary *)groups withTimestamp:(NSNumber *)timestamp outOfSession:(BOOL)outOfSession {
-    [self logEvent:eventType withEventProperties:eventProperties withApiProperties:nil withUserProperties:nil withGroups:groups withGroupProperties:nil withTimestamp:timestamp outOfSession:outOfSession];
+    [self logEvent:eventType withEventProperties:eventProperties withApiProperties:nil withUserProperties:nil withGroups:groups withGroupProperties:nil withTimestamp:timestamp outOfSession:outOfSession forceUserId:nil];
 }
 
 - (void)logEvent:(NSString *)eventType withEventProperties:(NSDictionary *)eventProperties withApiProperties:(NSDictionary *)apiProperties withUserProperties:(NSDictionary *)userProperties withGroups:(NSDictionary *)groups withGroupProperties:(NSDictionary *)groupProperties withTimestamp:(NSNumber *)timestamp outOfSession:(BOOL)outOfSession {
-    [self logEvent:eventType withEventProperties:eventProperties withApiProperties:apiProperties withUserProperties:userProperties withGroups:groups withGroupProperties:groupProperties withTimestamp:timestamp outOfSession:outOfSession withMiddlewareExtra:nil];
+    [self logEvent:eventType withEventProperties:eventProperties withApiProperties:apiProperties withUserProperties:userProperties withGroups:groups withGroupProperties:groupProperties withTimestamp:timestamp outOfSession:outOfSession forceUserId:nil];
 }
 
-- (void)logEvent:(NSString *)eventType withEventProperties:(NSDictionary *)eventProperties withApiProperties:(NSDictionary *)apiProperties withUserProperties:(NSDictionary *)userProperties withGroups:(NSDictionary *)groups withGroupProperties:(NSDictionary *)groupProperties withTimestamp:(NSNumber *)timestamp outOfSession:(BOOL)outOfSession withMiddlewareExtra: (nullable NSMutableDictionary *) extra {
+- (void)logEvent:(NSString *)eventType withEventProperties:(NSDictionary *)eventProperties withApiProperties:(NSDictionary *)apiProperties withUserProperties:(NSDictionary *)userProperties withGroups:(NSDictionary *)groups withGroupProperties:(NSDictionary *)groupProperties withTimestamp:(NSNumber *)timestamp outOfSession:(BOOL)outOfSession forceUserId:(nullable NSString *)userId {
+    [self logEvent:eventType withEventProperties:eventProperties withApiProperties:apiProperties withUserProperties:userProperties withGroups:groups withGroupProperties:groupProperties withTimestamp:timestamp outOfSession:outOfSession forceUserId:userId withMiddlewareExtra:nil];
+}
+
+- (void)logEvent:(NSString *)eventType withEventProperties:(NSDictionary *)eventProperties withApiProperties:(NSDictionary *)apiProperties withUserProperties:(NSDictionary *)userProperties withGroups:(NSDictionary *)groups withGroupProperties:(NSDictionary *)groupProperties withTimestamp:(NSNumber *)timestamp outOfSession:(BOOL)outOfSession forceUserId:(nullable NSString *)userId withMiddlewareExtra:(nullable NSMutableDictionary *)extra {
     if (self.apiKey == nil) {
         AMPLITUDE_ERROR(@"ERROR: apiKey cannot be nil or empty, set apiKey with initializeApiKey: before calling logEvent");
         return;
@@ -773,6 +778,11 @@ static NSString *const APP_BUILD = @"app_build";
         [event setValue:timestamp forKey:@"timestamp"];
 
         [self annotateEvent:event];
+        
+        // Overwrite userId if forced
+        if (userId != nil) {
+            [event setValue:userId forKey:@"user_id"];
+        }
 
         AMPMiddlewarePayload * middlewarePayload = [[AMPMiddlewarePayload alloc] initWithEvent:event withExtra:extra];
 
@@ -1414,7 +1424,11 @@ static NSString *const APP_BUILD = @"app_build";
     NSMutableDictionary *apiProperties = [NSMutableDictionary dictionary];
     [apiProperties setValue:sessionEvent forKey:@"special"];
     NSNumber *timestamp = [self lastEventTime];
-    [self logEvent:sessionEvent withEventProperties:nil withApiProperties:apiProperties withUserProperties:nil withGroups:nil withGroupProperties:nil withTimestamp:timestamp outOfSession:NO];
+    NSString *userId;
+    if (sessionEvent == kAMPSessionEndEvent) {
+        userId = [self lastUserId];
+    }
+    [self logEvent:sessionEvent withEventProperties:nil withApiProperties:apiProperties withUserProperties:nil withGroups:nil withGroupProperties:nil withTimestamp:timestamp outOfSession:NO forceUserId:userId];
 }
 
 - (BOOL)inSession {
@@ -1444,6 +1458,7 @@ static NSString *const APP_BUILD = @"app_build";
         return;
     }
     [self setLastEventTime:timestamp];
+    [self setLastUserId:self.userId];
 }
 
 - (void)setPreviousSessionId:(long long)previousSessionId {
@@ -1463,8 +1478,16 @@ static NSString *const APP_BUILD = @"app_build";
     (void) [self.dbHelper insertOrReplaceKeyLongValue:PREVIOUS_SESSION_TIME value:timestamp];
 }
 
+- (void)setLastUserId:(NSString *)userId {
+    (void) [self.dbHelper insertOrReplaceKeyValue:PREVIOUS_USER_ID value:userId];
+}
+
 - (NSNumber *)lastEventTime {
     return [self.dbHelper getLongValue:PREVIOUS_SESSION_TIME];
+}
+
+- (NSString *)lastUserId {
+    return [self.dbHelper getValue:PREVIOUS_USER_ID];
 }
 
 - (void)identify:(AMPIdentify *)identify {
